@@ -1,15 +1,22 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import axiosClient from './utils/axiosClient'
+import {toast} from 'react-toastify';
 
 export const registerUser = createAsyncThunk(
   'auth/register',
   async (userData, { rejectWithValue }) => {
     try {
     const response =  await axiosClient.post('/api/users/register',userData);
-    console.log(response);
-    
+    if(response?.status === 201)
+    {
+      toast.success(response?.data?.message);
+    }
     return response.data.user;
     } catch (error) {
+      if(error.response?.status === 400 || error)
+        {
+          toast.error(error.message);
+        }
       console.error("Registration failed:", error);
       return rejectWithValue({message : error.message});
     }
@@ -21,11 +28,16 @@ export const loginUser = createAsyncThunk(
   'auth/login',
   async (credentials, { rejectWithValue }) => {
     try {
-      console.log(credentials);
       const response = await axiosClient.post('/api/users/login', credentials);
-      return response.data.user;
+      if(response?.status === 200)
+        toast.success(response?.data?.message);
+        return response.data.user;
     } catch (error) {
-      console.error("login failed:", error);
+      if(error.response?.status === 401){
+        toast.error("Invalid Credentials");
+        return rejectWithValue({message : "Invalid Credentials"});
+      }
+      toast.error("Network Error, Try Again Later")
       return rejectWithValue({message : error.message});
     }
   }
@@ -36,10 +48,9 @@ export const checkAuth = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const { data } = await axiosClient.get('/api/users/check');
-      console.log(data);
       return data.user;
     } catch (error) {
-      return rejectWithValue(error);
+      return rejectWithValue({message : error.message});
     }
   }
 );
@@ -56,6 +67,7 @@ export const logoutUser = createAsyncThunk(
     }
   }
 );
+
 
 const authSlice = createSlice({
   name: 'auth',

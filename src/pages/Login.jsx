@@ -4,6 +4,9 @@ import { z } from 'zod';
 import {useDispatch, useSelector} from 'react-redux';
 import { loginUser } from '../authSlice';
 import { NavLink } from 'react-router';
+import { LogIn } from 'lucide-react';
+import { useEffect, useState } from 'react';
+
 
 const LoginSchema = z.object({
     emailId : z.string().email('Invalid email'),
@@ -13,23 +16,28 @@ const LoginSchema = z.object({
 function Login(){
 
 
-    const {register,handleSubmit,formState: { errors },} = useForm({resolver : zodResolver(LoginSchema)});
-    const dispatch = useDispatch();
-    const {loading} = useSelector((state)=>state.auth);
-    
+  const {loading,error,user} = useSelector((state)=>state.auth);
+  const dispatch = useDispatch();
+  const {register,handleSubmit,formState: { errors },} = useForm({resolver : zodResolver(LoginSchema)});
+  const [loginLoading,setLoginLoading] = useState(false);
+  
+  
+
     const onSubmit = (data) => {
-        console.log(data)
+        
         dispatch(loginUser(data));
     }
-
+    
+    
     return (
-        <div className="min-h-screen flex items-center justify-center p-4 bg-base-200"> {/* Added bg for contrast */}
-      <div className="card w-96 bg-base-100 shadow-xl">
+        <div className="min-h-screen flex items-center justify-center p-4 bg-zinc-900"> {/* Added bg for contrast */}
+      <div  className="card  w-96 bg-[#131213] shadow-xl">
         <div className="card-body">
-          <h2 className="card-title justify-center text-3xl mb-6">Leetcode</h2> {/* Added mb-6 */}
+          <h2 className="card-title justify-center text-3xl mb-6">Sign In</h2> {/* Added mb-6 */}
 
           
-          <form onSubmit={handleSubmit(onSubmit)}>
+          <form  onSubmit={handleSubmit(onSubmit)}>
+            
             <div className="form-control"> {/* Removed mt-4 from first form-control for tighter spacing to title or global error */}
               <label className="label mb-3"> {/* Removed mb-1, default spacing should be fine */}
                 <span className="label-text">Email</span>
@@ -37,7 +45,7 @@ function Login(){
               <input
                 type="email"
                 placeholder="john@example.com"
-                className={`input border-0 w-full ${errors.emailId ? 'input-error' : ''}`} 
+                className={`input bg-neutral-800 border-0 w-full ${errors.emailId ? 'input-error' : ''}`} 
                 {...register('emailId')}
               />
               {errors.emailId && (
@@ -53,10 +61,10 @@ function Login(){
                 <input
                   type="password"
                   placeholder="••••••••"
-                  className={`input border-0 w-full pr-10 ${errors.password ? 'input-error' : ''}`}
+                  className={`input bg-neutral-800 border-0 w-full pr-10 ${errors.password ? 'input-error' : ''}`}
                   {...register('password')}
                 />
-                <button
+                <button 
                   type="button"
                   className="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
                   
@@ -70,26 +78,25 @@ function Login(){
               )}
             </div>
 
-            <div className="form-control mt-8 flex justify-center">
+            <div className="form-control  mt-8 flex justify-center">
               <button
                 type="submit"
-                className={`btn btn-primary ${loading ? 'loading btn-disabled' : ''}`} // Added btn-disabled for better UX with loading
-                disabled={loading}
-              >
-                {loading ? (
-                  <>
-                    <span className="loading loading-spinner"></span>
-                    
-                  </>
-                ) : 'Login'}
+                className={`btn w-full border-0  bg-linear-to-r/srgb from-indigo-500 to-teal-400 ${loading ? 'loading loading-ring text-success loading-md' : ''}`} // Added btn-disabled for better UX with loading
+               
+              > 
+              {!loginLoading && <LogIn className='mr-2' size={18} />}
+                {loginLoading ? ( <span className="loading loading-spinner"></span>) 
+                : 
+                ("Let's Go")}
+                
               </button>
             </div>
           </form>
           <div className="text-center mt-6">
             <span className="text-sm">
-              Don't have an account?{' '} {/* Adjusted text slightly */}
+              Don't have an account? {' '} {/* Adjusted text slightly */}
               <NavLink to="/signup" className="link link-primary">
-                Sign Up
+                 Join the Community
               </NavLink>
             </span>
           </div>

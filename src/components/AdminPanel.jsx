@@ -8,8 +8,6 @@ import { useEffect } from "react";
 
 // Zod schema matching the problem schema
 const problemSchema = z.object({
-
-
   title: z.string().min(1, "Title is required"),
   description: z.string().min(1, "Description is required"),
   difficulty: z.enum(["easy", "medium", "hard"]),
@@ -49,16 +47,9 @@ const problemSchema = z.object({
     .length(3, "All three languages required"),
 });
 
-
-
-
 function AdminPanel() {
-
   const navigate = useNavigate();
-  const {isAuthenticated, user} = useSelector((state) => state.auth);
-
-
-
+  const { isAuthenticated, user } = useSelector((state) => state.auth);
 
   const {
     register,
@@ -82,14 +73,13 @@ function AdminPanel() {
   });
 
   const {
-    fields: visibleFields,
-    append: appendVisible,
-    remove: removeVisible,
+          fields: visibleFields,
+          append: appendVisible,
+          remove: removeVisible,
   } = useFieldArray({
     control,
     name: "visibleTestCases",
   });
-
 
   const {
     fields: hiddenFields,
@@ -100,9 +90,7 @@ function AdminPanel() {
     name: "hiddenTestCases",
   });
 
-
   const onSubmit = async (data) => {
-
     try {
       await axiosClient.post("/problem/create", data);
       alert("Problem created successfully!");
@@ -110,21 +98,14 @@ function AdminPanel() {
     } catch (error) {
       alert(`Error: ${error.response?.data?.message || error.message}`);
     }
-
   };
 
+  useEffect(() => {
+    if (!isAuthenticated && user?.role !== "admin") {
+      navigate("/");
+    }
+  }, [isAuthenticated]);
 
-  useEffect(()=>{
-
-      if(!isAuthenticated && user?.role !== 'admin'){
-
-        navigate('/');
-
-  }
-
-  },[isAuthenticated])
-
-  
   return (
     <div className="container mx-auto p-6">
       <h1 className="text-3xl font-bold mb-6">Create New Problem</h1>
@@ -135,12 +116,12 @@ function AdminPanel() {
           <h2 className="text-xl font-semibold mb-4">Basic Information</h2>
           <div className="space-y-4">
             <div className="form-control">
-              <label className="label">
+              <label className="label mr-3">
                 <span className="label-text">Title</span>
               </label>
               <input
                 {...register("title")}
-                className={`input input-bordered ${
+                className={`input border-0 ${
                   errors.title && "input-error"
                 }`}
               />
@@ -150,7 +131,7 @@ function AdminPanel() {
             </div>
 
             <div className="form-control">
-              <label className="label">
+              <label className="label mr-3">
                 <span className="label-text">Description</span>
               </label>
               <textarea
@@ -166,7 +147,7 @@ function AdminPanel() {
 
             <div className="flex gap-4">
               <div className="form-control w-1/2">
-                <label className="label">
+                <label className="label mr-3">
                   <span className="label-text">Difficulty</span>
                 </label>
                 <select
@@ -182,7 +163,7 @@ function AdminPanel() {
               </div>
 
               <div className="form-control w-1/2">
-                <label className="label">
+                <label className="label mr-3">
                   <span className="label-text">Tag</span>
                 </label>
                 <select
@@ -235,19 +216,19 @@ function AdminPanel() {
                 <input
                   {...register(`visibleTestCases.${index}.input`)}
                   placeholder="Input"
-                  className="input input-bordered w-full"
+                  className="input border-0 w-full"
                 />
 
                 <input
                   {...register(`visibleTestCases.${index}.output`)}
                   placeholder="Output"
-                  className="input input-bordered w-full"
+                  className="input border-0 w-full"
                 />
 
                 <textarea
                   {...register(`visibleTestCases.${index}.explanation`)}
                   placeholder="Explanation"
-                  className="textarea textarea-bordered w-full"
+                  className="textarea border-0 w-full"
                 />
               </div>
             ))}
@@ -281,13 +262,13 @@ function AdminPanel() {
                 <input
                   {...register(`hiddenTestCases.${index}.input`)}
                   placeholder="Input"
-                  className="input input-bordered w-full"
+                  className="input border-0 w-full"
                 />
 
                 <input
                   {...register(`hiddenTestCases.${index}.output`)}
                   placeholder="Output"
-                  className="input input-bordered w-full"
+                  className="input border-0 w-full"
                 />
               </div>
             ))}
@@ -306,26 +287,26 @@ function AdminPanel() {
                 </h3>
 
                 <div className="form-control">
-                  <label className="label">
+                  <label className="label mb-3">
                     <span className="label-text">Initial Code</span>
                   </label>
-                  <pre className="bg-base-300 p-4 rounded-lg">
+                  <pre className="bg-base-300 p-2 rounded-lg">
                     <textarea
                       {...register(`startCode.${index}.initialCode`)}
-                      className="w-full bg-transparent font-mono"
+                      className="w-full outline-0 bg-transparent font-mono"
                       rows={6}
                     />
                   </pre>
                 </div>
 
                 <div className="form-control">
-                  <label className="label">
+                  <label className="label mb-3">
                     <span className="label-text">Reference Solution</span>
                   </label>
                   <pre className="bg-base-300 p-4 rounded-lg">
                     <textarea
                       {...register(`referenceSolution.${index}.completeCode`)}
-                      className="w-full bg-transparent font-mono"
+                      className="w-full outline-0 bg-transparent font-mono"
                       rows={6}
                     />
                   </pre>

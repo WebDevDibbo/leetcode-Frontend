@@ -41,10 +41,10 @@ function Signup(){
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-4"> {/* Centering container */}
-      <div className="card w-96 bg-base-100 shadow-xl"> {/* Existing card styling */}
+        <div className="min-h-screen bg-zinc-900 flex items-center justify-center p-4"> {/* Centering container */}
+      <div className="card w-96 bg-[#131213] shadow-xl"> {/* Existing card styling */}
         <div className="card-body">
-          <h2 className="card-title justify-center text-3xl">Leetcode</h2> {/* Centered title */}
+          <h2 className="card-title justify-center text-3xl">Join Now</h2> {/* Centered title */}
           <form onSubmit={handleSubmit(onSubmit)}>
             {/* Existing form fields */}
             <div className="form-control">
@@ -54,7 +54,7 @@ function Signup(){
               <input
                 type="text"
                 placeholder="John"
-                className={`input border-0 ${errors.firstName && 'input-error'}`}
+                className={`input border-0 bg-neutral-800 w-full ${errors.firstName && 'input-error'}`}
                 {...register('firstName')}
               />
               {errors.firstName && (
@@ -69,7 +69,7 @@ function Signup(){
               <input
                 type="email"
                 placeholder="john@example.com"
-                className={`input border-0 ${errors.emailId && 'input-error'}`}
+                className={`input border-0 bg-neutral-800 w-full ${errors.emailId && 'input-error'}`}
                 {...register('emailId')}
               />
               {errors.emailId && (
@@ -86,16 +86,16 @@ function Signup(){
                   type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
                   // Added pr-10 (padding-right) to make space for the button
-                  className={`input border-0 w-full pr-10 ${errors.password ? 'input-error' : ''}`}
+                  className={`input border-0 bg-neutral-800 w-full  pr-10 ${errors.password ? 'input-error' : ''}`}
                   {...register('password')}
                 />
                 <button
                   type="button"
-                  className="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-500" // Added transform for better centering, styling
+                  className="absolute cursor-pointer top-1/2 right-3 transform -translate-y-1/2 text-gray-500 " // Added transform for better centering, styling
                   onClick={() => setShowPassword(!showPassword)}
                   aria-label={showPassword ? "Hide password" : "Show password"} // Accessibility
                 >
-                  {showPassword ? <FaEye className='text-lg'/> : <FaEyeSlash className='text-lg'/>}
+                  <div>{showPassword ? <FaEye className='text-lg '/> : <FaEyeSlash className='text-lg'/>}</div>
                 </button>
               </div>
               {errors.password && (
@@ -106,9 +106,9 @@ function Signup(){
             <div className="form-control mt-6 flex justify-center">
               <button
                 type="submit"
-                className="btn btn-primary"
+                className={`btn border-0 ${loading ? 'loading' : ""} w-full bg-linear-to-r/hsl from-indigo-500 to-teal-400`}
               >
-                Sign Up
+                {loading ? "Signing up..." : "Open an Account"}
               </button>
             </div>
           </form>
