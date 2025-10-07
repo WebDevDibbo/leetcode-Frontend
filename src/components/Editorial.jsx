@@ -1,27 +1,34 @@
 import { useState, useRef, useEffect } from 'react';
-import { Pause, Play,Settings, Volume2, VolumeOff, Expand } from 'lucide-react';
+import { Pause, Play,Settings, Volume2, VolumeOff, Expand, X, Check } from 'lucide-react';
 
 
 const Editorial = ({secureUrl, duration, thumbnailUrl, cloudName,publicId}) => {
     // console.log('edit',problem)
 
   const videoQualities = {
-  auto: `https://res.cloudinary.com/${cloudName}/video/upload/q_auto/${publicId}.mp4`,
-  low: `https://res.cloudinary.com/${cloudName}/video/upload/q_40/${publicId}.mp4`,
-  medium: `https://res.cloudinary.com/${cloudName}/video/upload/q_60/${publicId}.mp4`,
-  high: `https://res.cloudinary.com/${cloudName}/video/upload/q_80/${publicId}.mp4`
+    "auto": `https://res.cloudinary.com/${cloudName}/video/upload/q_auto/${publicId}.mp4`,
+    "1080p": `https://res.cloudinary.com/${cloudName}/video/upload/q_80/${publicId}.mp4`,
+    "720p": `https://res.cloudinary.com/${cloudName}/video/upload/q_60/${publicId}.mp4`,
+    "480p": `https://res.cloudinary.com/${cloudName}/video/upload/q_40/${publicId}.mp4`,
 };
 
-  const dialogRef = useRef(null);
-  const [isOpen, setIsOpen] = useState(false);
+  const qualities = [
+    { label: "auto", value: "auto" },
+    { label: "1080p", value: "1080p" },
+    { label: "720p", value: "720p" },
+    { label: "480p", value: "480p" },
+  ];
+
+  // const dialogRef = useRef(null);
+  // const [isOpen, setIsOpen] = useState(false);
   const videoRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [isHovering, setIsHovering] = useState(false);
   const [volume,setVolume]  = useState(1);
   const [soundHover, setSoundHover] = useState(false);
-
-  
+  const [selectedQuality, setSelectedQuality] = useState("auto");
+  const [settingoff, setSettingoff] = useState(false);
 
   // Format seconds to MM:SS
   const formatTime = (seconds) => {
@@ -30,6 +37,10 @@ const Editorial = ({secureUrl, duration, thumbnailUrl, cloudName,publicId}) => {
     return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   };
 
+  const handleCross = () => {
+    setSettingoff(!settingoff);
+
+  }
   const togglePlayPause = () => {
     if (videoRef.current) {
       if (isPlaying) {
@@ -50,28 +61,40 @@ const Editorial = ({secureUrl, duration, thumbnailUrl, cloudName,publicId}) => {
       document.exitFullscreen();
   }
 
- 
-
   // Function to open the dialog using the non-modal 'show()' method
   const handleOpenDialog = () => {
-    if (dialogRef.current) {
-      dialogRef.current.show();
-      setIsOpen(true);
-    }
+    setSettingoff(!settingoff)
   };
 
-  // Function to close the dialog
-  const handleCloseDialog = () => {
-    if (dialogRef.current) {
-      dialogRef.current.close();
-      setIsOpen(false);
-    }
+   const handleQualitySelect = (quality) => {
+
+    const video = videoRef.current;
+    if(!video) return;
+
+    const currentTime = video.currentTime;
+    const isPlaying = !video.paused;
+
+    video.src = videoQualities[quality];
+    video.load();
+
+    //restore position
+  video.addEventListener(
+    "loadedmetadata",
+    () => {
+      video.currentTime = currentTime;
+      if (isPlaying) {
+        video.play().catch((err) => console.warn("Playback blocked:", err));
+      }
+    },
+    { once: true }
+  );
+    setSelectedQuality(quality);
   };
+
 
   const handleVolume = (e) => {
     const newVolume = e.target.value / 100;
     setVolume(newVolume);
-    // console.log('soudn',videoRef.current)
     if(videoRef.current)
       videoRef.current.volume = newVolume;
   }
@@ -79,7 +102,7 @@ const Editorial = ({secureUrl, duration, thumbnailUrl, cloudName,publicId}) => {
   // Update current time during playback
   useEffect(() => {
     const video = videoRef.current;
-    console.log('videoooo')
+    
     const handleTimeUpdate = () => {
       if (video) setCurrentTime(video.currentTime);
     };
@@ -100,11 +123,13 @@ const Editorial = ({secureUrl, duration, thumbnailUrl, cloudName,publicId}) => {
       <video
         id="video-container"
         ref={videoRef}
-        src={secureUrl}
+        src={videoQualities[selectedQuality]}
         poster={thumbnailUrl}
         onClick={togglePlayPause}
-        className="w-full relative aspect-video bg-black cursor-pointer"
-      ></video>
+        className="w-screen aspect-video bg-black cursor-pointer"
+      >
+        {/* <source src={videoQualities[selectedQuality]} type="video/mp4" /> */}
+      </video>
 
       {/* Video Controls Overlay */}
       {/* Video Controls Overlay */}
@@ -175,17 +200,8 @@ const Editorial = ({secureUrl, duration, thumbnailUrl, cloudName,publicId}) => {
               />
             )}
           </div>
-          <p className="ml-2 relative bottom-2.5 cursor-pointer">
-            {" "}
+          <p className="ml-2 cursor-pointer">
             <Settings className="size-5" onClick={handleOpenDialog} />
-            <dialog ref={dialogRef} id="my_modal_2" className="modal">
-              <div className="modal-box w-60 h-[275px] overflow-y-auto px-0 py-0 border bg-[#000000] max-w-xs absolute right-20 bottom-30">
-                <h3 className="font-bold text-lg">Hello!</h3>
-              </div>
-              <form method="dialog" className="modal-backdrop">
-                <button>close</button>
-              </form>
-            </dialog>
           </p>
           <Expand
             onClick={handleFullScreen}
@@ -193,6 +209,67 @@ const Editorial = ({secureUrl, duration, thumbnailUrl, cloudName,publicId}) => {
           />
         </div>
       </div>
+      {/* <p className="cursor-pointer"> */}
+      <div
+        id="dialog"
+        className={`${
+          !settingoff && "hidden -z-10"
+        } absolute top-0 bg-black w-full h-full max-w-2xl`}
+      >
+        <p
+          className={`${
+            !settingoff && "hidden"
+          }  font-semibold flex items-center justify-between mb-2 text-lg pt-3 pr-5 pl-3`}
+        >
+          <span>Settings</span>{" "}
+          <X
+            onClick={handleCross}
+            className="cursor-pointer size-5 mt-1 font-semibold"
+          />
+        </p>
+        <hr className="mb-2" />
+        <div>
+          {/* Quality Selector */}
+          {
+            <div
+              className={`${!settingoff && "hidden -z-10"} ${
+                settingoff && "block z-10"
+              } grid place-items-start`}
+            >
+              {/* {Object.keys(videoQualities).map((quality) => 
+               
+              (
+               
+              <button
+                key={quality}
+                
+                onClick={()=>handleQuality(quality)}
+                className={`cursor-pointer px-3 py-1 w-full mb-2 text-sm font-semibold transition  hover:bg-[#343434]
+              text-white}
+            `}
+              >
+                
+                {quality}
+              </button>
+                )
+            )} */}
+               {qualities.map((q) => (
+              <button
+                key={q.value}
+                onClick={() => handleQualitySelect(q.value)}
+                className={`w-full flex items-center cursor-pointer justify-between px-3 py-1.5 text-sm hover:bg-white/10 transition ${
+                  selectedQuality === q.value ? "text-blue-400" : "text-gray-300"
+                }`}
+              >
+                <span>{q.label}</span>
+                {selectedQuality === q.value && <Check size={14} />}
+              </button>
+            ))}
+            </div>
+          }
+        </div>
+      </div>
+      {/* </p> */}
     </div>
   );
 };
